@@ -79,6 +79,20 @@ if (!apiKey) {
   });
 }
 
+// Create bouncing dots wait message
+function createBouncingDotsMessage() {
+  const dotsContainer = document.createElement('div');
+  dotsContainer.className = 'bouncing-dots';
+  
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dotsContainer.appendChild(dot);
+  }
+  
+  return dotsContainer;
+}
+
 // Function to add markers to the map
 function addMarkersToMap(points, isDynamic = false) {
   points.forEach((point, index) => {
@@ -259,14 +273,33 @@ suggestionChips.forEach(btn => {
 function addMessage(content, isUser = false) {
   const div = document.createElement('div');
   div.className = `message ${isUser ? 'user' : 'bot'}`;
-  div.innerHTML = `
-        <div class="avatar ${isUser ? 'user-avatar' : 'bot-avatar'}">
-            ${isUser ? '💬' : '🤖'}
-        </div>
-        <div class="message-content">${content}</div>
-    `;
+  
+  // Create avatar
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${isUser ? 'user-avatar' : 'bot-avatar'}`;
+  avatar.textContent = isUser ? '💬' : '🤖';
+  
+  // Create message content container
+  const messageContent = document.createElement('div');
+  messageContent.className = 'message-content';
+  
+  // Handle different content types
+  if (typeof content === 'string') {
+    // Parse markdown to HTML
+    const htmlContent = marked.parse(content);
+    messageContent.innerHTML = htmlContent;
+  } else if (content instanceof HTMLElement) {
+    messageContent.appendChild(content);
+  }
+  
+  // Append avatar and content to message div
+  div.appendChild(avatar);
+  div.appendChild(messageContent);
+  
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+  
+  return div;
 }
 
 function showTyping() {
@@ -280,12 +313,14 @@ function hideTyping() {
   typingIndicator.style.display = 'none';
 }
 
-function addBotMessage(text) {
-  showTyping();
-  setTimeout(() => {
+function addBotMessage(content, isWaitMessage = false) {
+  if (isWaitMessage) {
+    return addMessage(content, false);
+  } else {
+    showTyping();
     hideTyping();
-    addMessage(text, false);
-  }, 1000 + Math.random() * 1500);
+    return addMessage(content, false);
+  }
 }
 
 async function getBotResponse(msg) {
@@ -461,12 +496,22 @@ async function getBotResponse(msg) {
   }
 
   if (lc.includes('prompt')) {
-    console.log('\n--- Single Prompt Example ---');
-    const prompt = "Hi!";
-    console.log('Sending prompt:', prompt);
+    // Send system message and store reference
+    const waitMsg = await waitMessage();
     
-    const result = await client.sendPrompt(prompt);
-    return result;
+    try {
+      const result = await client.sendPrompt(lc);
+      console.log('Response:', result);
+      return result.response;
+    } catch (error) {
+      console.error('Error sending prompt:', error.message);
+      return "Error occurred while processing prompt";
+    } finally {
+      // Remove wait message in both success and error cases
+      if (waitMsg && waitMsg.remove) {
+        waitMsg.remove();
+      }
+    }
   }
 
   if (lc.includes('hello') || lc.includes('hi') || lc.includes('hola')) {
@@ -490,6 +535,11 @@ async function sendMessage() {
 
   const botReply = await getBotResponse(text);
   addBotMessage(botReply);
+}
+
+async function waitMessage() {
+  const waitMsgElement = createBouncingDotsMessage();
+  return addBotMessage(waitMsgElement, true);
 }
 
 async function sendSuggestion(text) {

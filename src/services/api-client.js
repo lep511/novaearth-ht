@@ -17,7 +17,11 @@ export class APIClient {
 
     const { controller, timeoutId } = createTimeoutController(options.timeout || this.timeout);
     
-    const url = `${this.baseUrl}/converse?prompt=${encodeURIComponent(prompt)}`;
+    const url = `${this.baseUrl}/converse`;
+    
+    const raw = JSON.stringify({
+      "prompt": prompt
+    });
     
     const requestConfig = {
       method: 'POST',
@@ -26,6 +30,7 @@ export class APIClient {
         ...options.headers
       },
       redirect: 'follow',
+      body: raw,
       signal: controller.signal,
       ...options.fetchOptions
     };

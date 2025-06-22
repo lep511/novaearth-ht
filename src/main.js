@@ -8,6 +8,43 @@ const apiKey = getApiKey();
 const region = "us-east-1";
 const style = "Standard";
 const colorScheme = "Light";
+// Set initial view
+const homeView = {
+  center: [25, 40],
+  zoom: 2,
+  pitch: 0,
+  bearing: 0
+};
+
+class HomeControl {
+  constructor(homeView) {
+    this.homeView = homeView;
+  }
+
+  onAdd(map) {
+    this.map = map;
+    this.container = document.createElement('div');
+    this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+    
+    this.homeButton = document.createElement('button');
+    this.homeButton.className = 'maplibregl-ctrl-icon';
+    this.homeButton.type = 'button';
+    this.homeButton.title = 'Reset to home view';
+    this.homeButton.innerHTML = '↩'; // or use an icon
+    
+    this.homeButton.addEventListener('click', () => {
+      this.map.flyTo(this.homeView);
+    });
+    
+    this.container.appendChild(this.homeButton);
+    return this.container;
+  }
+
+  onRemove() {
+    this.container.parentNode.removeChild(this.container);
+    this.map = undefined;
+  }
+}
 
 // Declare map variable globally
 let map = null;
@@ -17,7 +54,7 @@ let dynamicMarkers = [];
 function getApiKey() {
   const viteKey = import.meta.env.VITE_LOCATION_API_KEY;
   if (viteKey) {
-      console.log('✅ API Key loaded from Vite');
+      console.log('✅ Start ok');
       return viteKey;
   } else {
       console.error('❌ VITE_LOCATION_API_KEY not found in environment variables.');
@@ -42,37 +79,45 @@ if (!apiKey) {
   map = new maplibregl.Map({
     container: "map",
     style: `https://maps.geo.${region}.amazonaws.com/v2/styles/${style}/descriptor?key=${apiKey}&color-scheme=${colorScheme}`,
-    center: [18.0686, 59.3293],
-    zoom: 11
+    // Europe
+    center: [25, 40], // longitude, latitude
+    zoom: 2,
+    maxZoom: 18, // Maximum zoom in level
+    minZoom: 1   // Maximum zoom out level (lower number = more zoomed out)
   });
 
-  // Add navigation controls
-  map.addControl(new maplibregl.NavigationControl(), "top-left");
+  map.addControl(new maplibregl.NavigationControl({
+    showZoom: true,
+    visualizePitch: true
+  }), 'top-left');
 
-  // Initial points of interest (static)
-  const initialPoints = [{
-      lng: 18.0009,
-      lat: 59.3728,
-      title: 'Friends Arena',
-      description: "Sweden's national football stadium in Solna",
-      type: 'stadium'
-    },
-    {
-      lng: 18.0649,
-      lat: 59.3326,
-      title: 'Stockholm City',
-      description: 'Capital and largest city of Sweden',
-      type: 'city'
-    },
-    {
-      lng: 17.6389,
-      lat: 59.8586,
-      title: 'Uppsala',
-      description: 'Historic university city north of Stockholm',
-      type: 'university'
+  // Function to initialize the map
+  initializeMap();
+
+  // Add custom home control
+  map.addControl(new HomeControl(homeView), 'top-left');
+
+}
+
+// Function to load points from JSON file
+async function loadInitialPoints() {
+  try {
+    const response = await fetch('../public/aws-regions.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  ];
+    const initialPoints = await response.json();
+    return initialPoints;
+  } catch (error) {
+    console.error('Error loading points data:', error);
+    // Return fallback data or empty array
+    return [];
+  }
+}
 
+async function initializeMap() {
+  const initialPoints = await loadInitialPoints();
+  
   // Add initial markers when the map is loaded
   map.on('load', () => {
     addMarkersToMap(initialPoints);
@@ -127,9 +172,23 @@ function addMarkersToMap(points, isDynamic = false) {
       .setPopup(popup)
       .addTo(map);
 
+    // For hover popup
+    markerElement.addEventListener('mouseenter', () => {
+      popup.setLngLat([point.lng, point.lat])
+            .addTo(map);
+    });
+
+    markerElement.addEventListener('mouseleave', () => {
+      popup.remove();
+    });
+
     // Add click event to marker
     markerElement.addEventListener('click', () => {
-      addBotMessage(`You clicked on ${point.title}! ${point.description}`);
+      // addBotMessage(`${point.long_description}`);
+      map.flyTo({
+        center: [point.lng, point.lat],
+        zoom: 12
+      });
     });
 
     // Store dynamic markers for potential cleanup
@@ -167,66 +226,6 @@ function clearDynamicMarkers() {
   dynamicMarkers.forEach(marker => marker.remove());
   dynamicMarkers = [];
 }
-
-// Database of locations that can be added dynamically
-const locationDatabase = {
-  'rome': {
-    lng: 12.4964,
-    lat: 41.9028,
-    title: 'Rome',
-    description: 'Capital of Italy, famous for its history, art and culture',
-    type: 'city'
-  },
-  'paris': {
-    lng: 2.3522,
-    lat: 48.8566,
-    title: 'Paris',
-    description: 'Capital of France, known as the City of Light',
-    type: 'city'
-  },
-  'london': {
-    lng: -0.1276,
-    lat: 51.5074,
-    title: 'London',
-    description: 'Capital of the United Kingdom',
-    type: 'city'
-  },
-  'berlin': {
-    lng: 13.4050,
-    lat: 52.5200,
-    title: 'Berlin',
-    description: 'Capital of Germany',
-    type: 'city'
-  },
-  'madrid': {
-    lng: -3.7038,
-    lat: 40.4168,
-    title: 'Madrid',
-    description: 'Capital of Spain',
-    type: 'city'
-  },
-  'barcelona': {
-    lng: 2.1734,
-    lat: 41.3851,
-    title: 'Barcelona',
-    description: 'Catalonian city famous for Gaudí architecture',
-    type: 'city'
-  },
-  'amsterdam': {
-    lng: 4.9041,
-    lat: 52.3676,
-    title: 'Amsterdam',
-    description: 'Capital of the Netherlands, known for canals',
-    type: 'city'
-  },
-  'vienna': {
-    lng: 16.3738,
-    lat: 48.2082,
-    title: 'Vienna',
-    description: 'Capital of Austria, famous for classical music',
-    type: 'city'
-  }
-};
 
 // Global variables for chat
 const chatContainer = document.getElementById('chatContainer');
@@ -338,12 +337,12 @@ async function getBotResponse(msg) {
   }
 
   // Check for locations in the database
-  for (const [key, location] of Object.entries(locationDatabase)) {
-    if (lc.includes(key)) {
-      addDynamicPoint(location.lng, location.lat, location.title, location.description, location.type);
-      return `${location.title} has been added to the map! ${location.description}`;
-    }
-  }
+  // for (const [key, location] of Object.entries(locationDatabase)) {
+  //   if (lc.includes(key)) {
+  //     addDynamicPoint(location.lng, location.lat, location.title, location.description, location.type);
+  //     return `${location.title} has been added to the map! ${location.description}`;
+  //   }
+  // }
 
   if (lc.includes('usa')) {
     map.flyTo({
@@ -519,8 +518,7 @@ async function getBotResponse(msg) {
   }
 
   if (lc.includes('/help') || lc.includes('what can you do')) {
-    const availableCities = Object.keys(locationDatabase).join(', ');
-    return `I can show you information about these cities: ${availableCities}. Just mention any city name and I'll add it to the map! You can also ask about Stockholm, Uppsala, Friends Arena, or type 'clear markers' to remove added points.`;
+    return `Help info.`;
   }
 
   return "I don't have that information, but try asking me about Rome, Paris, London, Berlin, Madrid, Barcelona, Amsterdam, Vienna, or the original locations on the map. Type 'help' to see all available commands.";

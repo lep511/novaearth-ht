@@ -51,34 +51,65 @@ body {
 }
 
 /* Alternative marker colors for different types */
-.custom-marker.stadium {
+/* Alternative marker colors for different regions */
+.custom-marker.north_america_region {
   background-color: #a8e6cf; /* Soft mint green */
   color: #2d5a3d;
 }
 
-.custom-marker.stadium:hover {
-  background-color: #88d8a3; /* Deeper mint */
+.custom-marker.north_america_region:hover {
+  background-color: #6ba77f; /* Deeper mint */
   color: #1a3d28;
 }
 
-.custom-marker.city {
-  background-color: #ffb3ba; /* Soft coral pink */
-  color: #8b2635;
+.custom-marker.asia_pacific_region {
+  background-color: #c68ad8; /* Soft purple */
+  color: #5a2c68;
 }
 
-.custom-marker.city:hover {
-  background-color: #ff9aa2; /* Deeper coral */
-  color: #6b1c28;
+.custom-marker.asia_pacific_region:hover {
+  background-color: #9d6ba8; /* Deeper purple */
+  color: #4a1f55;
 }
 
-.custom-marker.university {
-  background-color: #c7ceea; /* Soft lavender */
-  color: #4a4e7c;
+.custom-marker.africa_region {
+  background-color: #f4d03f; /* Soft golden yellow */
+  color: #8b6914;
 }
 
-.custom-marker.university:hover {
-  background-color: #b5bee8; /* Deeper lavender */
-  color: #3a3e6b;
+.custom-marker.africa_region:hover {
+  background-color: #d4ac0d; /* Deeper golden */
+  color: #6b5011;
+}
+
+.custom-marker.europe_region {
+  background-color: #85c1e9; /* Soft sky blue */
+  color: #1b4f72;
+}
+
+.custom-marker.europe_region:hover {
+  background-color: #5dade2; /* Deeper sky blue */
+  color: #154360;
+}
+
+.custom-marker.south_america_region {
+  background-color: #f8c471; /* Soft peach orange */
+  color: #8e4f1c;
+}
+
+.custom-marker.south_america_region:hover {
+  background-color: #e67e22; /* Deeper peach */
+  color: #7d3c0a;
+}
+
+.custom-marker.middle_east_region {
+  background-color: #f1948a; /* Soft coral pink */
+  color: #78281f;
+}
+
+.custom-marker.middle_east_region:hover {
+  background-color: #e74c3c; /* Deeper coral */
+  color: #641e16;
 }
 
 /* Chat Container */

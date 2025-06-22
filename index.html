@@ -1,13 +1,62 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaEarth - Project</title>
+    
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet" />
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+    <div id="map"></div>
+    
+    <!-- Chat Container -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header" id="chatHeader">
+            <h3>🗺️ Map Assistant</h3>
+            <button class="clear-history-btn" id="clearHistoryBtn">🗑️</button>
+            <button class="minimize-btn" id="minimizeBtn">−</button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="avatar bot-avatar">🤖</div>
+                <div class="message-content">
+                    Hello! I'm your map assistant. I can help you with information about the places marked on the map.
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-wrapper" id="typingWrapper">
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="suggestion-chips">
+            <button class="suggestion-chip" data-suggestion="About Stockholm">About Stockholm</button>
+            <button class="suggestion-chip" data-suggestion="Show me Madrid">Go to Madrid</button>
+            <button class="suggestion-chip" data-suggestion="What's the distance between cities?">Distance</button>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Write your message..." />
+            <button class="send-btn" id="sendBtn">→</button>
+        </div>
+    </div>
+
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
+    
+    <!-- JavaScript personalizado -->
+    <script type="module" src="src/main.js"></script>
+</body>
 </html>

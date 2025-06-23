@@ -184,7 +184,7 @@ function addMarkersToMap(points, isDynamic = false) {
 
     // Add click event to marker
     markerElement.addEventListener('click', () => {
-      // addBotMessage(`${point.long_description}`);
+      addBotMessage(`${point.long_description}`);
       map.flyTo({
         center: [point.lng, point.lat],
         zoom: 12
@@ -230,7 +230,6 @@ function clearDynamicMarkers() {
 // Global variables for chat
 const chatContainer = document.getElementById('chatContainer');
 const chatHeader = document.getElementById('chatHeader');
-const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 const minimizeBtn = document.getElementById('minimizeBtn');
 const chatMessages = document.getElementById('chatMessages');
 const messageInput = document.getElementById('messageInput');
@@ -238,10 +237,6 @@ const sendBtn = document.getElementById('sendBtn');
 const suggestionChips = document.querySelectorAll('.suggestion-chip');
 const typingWrapper = document.getElementById('typingWrapper');
 const typingIndicator = document.getElementById('typingIndicator');
-
-clearHistoryBtn.addEventListener('click', () => {
-  chatMessages.innerHTML = '';
-});
 
 let chatMinimized = false;
 
@@ -328,12 +323,6 @@ async function getBotResponse(msg) {
   // Check if map is available
   if (!apiKey || !map) {
     return "Sorry, the map is not available because the API key configuration is missing.";
-  }
-
-  // Check for clear command
-  if (lc.includes('/clear')) {
-    clearDynamicMarkers();
-    return "All dynamic markers have been cleared from the map.";
   }
 
   // Check for locations in the database
@@ -517,8 +506,32 @@ async function getBotResponse(msg) {
     return "Hello! I can help you with information about cities and places. Try asking about Rome, Paris, London, Berlin, Madrid, Barcelona, Amsterdam, Vienna, or the original points Stockholm, Uppsala and Friends Arena. You can also type 'clear markers' to remove dynamic points.";
   }
 
+  // Check for clear command
+  if (lc.includes('/clear')) {
+    clearDynamicMarkers();
+    chatMessages.innerHTML = '';
+    return "Chat history and dynamic markers cleared.";
+  }
+
+  // Check for help command
   if (lc.includes('/help') || lc.includes('what can you do')) {
-    return `Help info.`;
+    const commands = [
+      { cmd: '/clear', desc: 'Remove all dynamic markers and chat history.' },
+      { cmd: '/locate', desc: 'Find and center map on a specific location.' },
+      { cmd: '/route', desc: 'Calculate route between two points.' },
+      { cmd: '/nearby', desc: 'Find nearby places of interest (restaurants, gas stations, etc.).' },
+      { cmd: '/traffic', desc: 'Show current traffic conditions.' },
+      { cmd: '/satellite', desc: 'Switch to satellite view.' },
+      { cmd: '/terrain', desc: 'Switch to terrain view.' },
+      { cmd: '/marker', desc: 'Add a custom marker to the map.' },
+      { cmd: '/distance', desc: 'Measure distance between two points.' },
+      { cmd: '/directions', desc: 'Get turn-by-turn directions.' },
+      { cmd: '/search', desc: 'Search for places, addresses, or coordinates.' },
+      { cmd: '/layers', desc: 'Toggle map layers (traffic, transit, bike paths).' },
+      { cmd: '/favorites', desc: 'Show saved favorite locations.' },
+      { cmd: '/help', desc: 'Show this help message.' }
+    ];
+    return `#### Commands \n${commands.map(({ cmd, desc }) => `* **${cmd}** - ${desc}`).join('\n\n')}`;
   }
 
   return "I don't have that information, but try asking me about Rome, Paris, London, Berlin, Madrid, Barcelona, Amsterdam, Vienna, or the original locations on the map. Type 'help' to see all available commands.";

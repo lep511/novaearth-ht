@@ -523,12 +523,9 @@ async function getBotResponse(msg) {
       { cmd: '/traffic', desc: 'Show current traffic conditions.' },
       { cmd: '/satellite', desc: 'Switch to satellite view.' },
       { cmd: '/terrain', desc: 'Switch to terrain view.' },
-      { cmd: '/marker', desc: 'Add a custom marker to the map.' },
       { cmd: '/distance', desc: 'Measure distance between two points.' },
       { cmd: '/directions', desc: 'Get turn-by-turn directions.' },
       { cmd: '/search', desc: 'Search for places, addresses, or coordinates.' },
-      { cmd: '/layers', desc: 'Toggle map layers (traffic, transit, bike paths).' },
-      { cmd: '/favorites', desc: 'Show saved favorite locations.' },
       { cmd: '/help', desc: 'Show this help message.' }
     ];
     return `#### Commands \n${commands.map(({ cmd, desc }) => `* **${cmd}** - ${desc}`).join('\n\n')}`;

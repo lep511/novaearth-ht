@@ -102,7 +102,7 @@ if (!apiKey) {
 // Function to load points from JSON file
 async function loadInitialPoints() {
   try {
-    const response = await fetch('../public/aws-regions.json');
+    const response = await fetch('./regions/aws-regions.json');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

@@ -1,4 +1,5 @@
 import { APIClient } from './services/api-client.js';
+import { awsRegionsData } from './regions/aws-regions-data.js';
 
 // Simple functional approach:
 // import { sendPrompt } from './src/services/simple-api.js';
@@ -100,23 +101,18 @@ if (!apiKey) {
 }
 
 // Function to load points from JSON file
-async function loadInitialPoints() {
+function loadInitialPoints() {
   try {
-    const response = await fetch('./regions/aws-regions.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const initialPoints = await response.json();
-    return initialPoints;
-  } catch (error) {
-    console.error('Error loading points data:', error);
-    // Return fallback data or empty array
+    // Data is immediately available
+    return awsRegionsData;
+  } catch (e) {
+    console.error("Error loading points data:", e);
     return [];
   }
 }
 
 async function initializeMap() {
-  const initialPoints = await loadInitialPoints();
+  const initialPoints = loadInitialPoints();
   
   // Add initial markers when the map is loaded
   map.on('load', () => {

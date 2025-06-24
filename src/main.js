@@ -51,6 +51,8 @@ class HomeControl {
 let map = null;
 // Array to store dynamically added markers
 let dynamicMarkers = [];
+// Array to store added elements
+let addedElements = [];
 
 function getApiKey() {
   const viteKey = import.meta.env.VITE_LOCATION_API_KEY;
@@ -217,6 +219,21 @@ function addDynamicPoint(lng, lat, title, description, type = 'city') {
 
 }
 
+// Function to clear all added elements
+function clearAllElements() {
+    addedElements.forEach(element => {
+        if (map.getLayer(element.layerId)) {
+            map.removeLayer(element.layerId);
+        }
+        if (map.getSource(element.sourceId)) {
+            map.removeSource(element.sourceId);
+        }
+    });
+    
+    // Clear the array
+    addedElements = [];
+}
+
 // Function to clear all dynamic markers
 function clearDynamicMarkers() {
   dynamicMarkers.forEach(marker => marker.remove());
@@ -338,7 +355,9 @@ async function getBotResponse(msg) {
     map.addSource("amazon-lockers", {
       type: "geojson",
       data: {
+        id: "points",
         type: "FeatureCollection",
+        source: "points",
         features: [{
             type: "Feature",
             geometry: {
@@ -396,7 +415,7 @@ async function getBotResponse(msg) {
             },
           },
         ],
-      },
+      }
     });
 
     // Add a new layer to visualize the points.
@@ -408,6 +427,12 @@ async function getBotResponse(msg) {
         "circle-radius": 8,
         "circle-color": "#0080ff",
       },
+    });
+    
+    // Store the IDs for later removal
+    addedElements.push({
+        layerId: "amazon-lockers",
+        sourceId: "amazon-lockers"
     });
     return "Go to usa.";
   }
@@ -476,6 +501,13 @@ async function getBotResponse(msg) {
                 "line-width": 8,
           },
     });
+
+    // Store the IDs for later removal
+    addedElements.push({
+        layerId: "route",
+        sourceId: "route"
+    });
+    
     return "Stockholm-Uppsala: ≈70 km; Stockholm-Friends Arena: ≈8 km; Uppsala-Friends Arena: ≈65 km.";
   }
 
@@ -505,6 +537,7 @@ async function getBotResponse(msg) {
   // Check for clear command
   if (lc.includes('/clear')) {
     clearDynamicMarkers();
+    clearAllElements();
     chatMessages.innerHTML = '';
     return "Chat history and dynamic markers cleared.";
   }
